@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Bookings</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9; /* Soft light background for a pleasant feel */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* Container for the whole page */
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: #ffffff; /* Classic white background */
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1.02); /* Slight zoom effect on hover */
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* Booking section */
+        .booking-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Individual booking card styling */
+        .booking-card {
+            background-color: #ecf0f1; /* Light grey background for cards */
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-card h3 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: #2980b9; /* Blue for cycle name */
+        }
+
+        .booking-card p {
+            margin: 8px 0;
+            font-size: 1rem;
+            color: #7f8c8d;
+        }
+
+        .booking-card strong {
+            color: #34495e;
+        }
+
+        .feedback {
+            font-style: italic;
+            color: #16a085;
+        }
+
+        /* Pagination Controls */
+        .pagination-controls {
+            display: flex;
+            justify-content: center; /* Centering the buttons */
+            align-items: center;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .pagination-controls button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 30px;
+            background-color: #3498db; /* Classic blue color */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .pagination-controls button:disabled {
+            background-color: #bdc3c7; /* Disabled button color */
+            cursor: not-allowed;
+        }
+
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #2980b9; /* Darker blue for hover */
+            transform: scale(1.05);
+        }
+
+        .page-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        /* Responsive Design for smaller screens */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+
+            .pagination-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .pagination-controls button {
+                margin: 5px 0;
+                width: 100%;
+            }
+
+            .page-number {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Previous Bookings</h1>
+        
+        <div id="booking-section" class="booking-section">
+            <!-- Booking details will be dynamically inserted here -->
+        </div>
+
+        <div class="pagination-controls">
+            <button id="prev-btn" disabled>Previous</button>
+            <span id="page-number" class="page-number">Page 1</span>
+            <button id="next-btn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Sample data (all with the same cycle name)
+        const bookings = [
+            { cycleName: "Mountain Trek 3000", renter: "John Doe", date: "March 10, 2024", duration: "3 hours", price: "$15", rating: "4.5/5", feedback: "Smooth ride and well-maintained cycle!" },
+            { cycleName: "Mountain Trek 3000", renter: "Jane Smith", date: "April 2, 2024", duration: "2 hours", price: "$10", rating: "4.2/5", feedback: "Comfortable and easy to handle." },
+            { cycleName: "Mountain Trek 3000", renter: "Sam Wilson", date: "May 15, 2024", duration: "4 hours", price: "$20", rating: "4.7/5", feedback: "Great performance for longer rides." },
+            { cycleName: "Mountain Trek 3000", renter: "Anna Lee", date: "June 5, 2024", duration: "1.5 hours", price: "$8", rating: "4.0/5", feedback: "Simple and efficient." },
+            { cycleName: "Mountain Trek 3000", renter: "Mark Ron", date: "July 20, 2024", duration: "5 hours", price: "$18", rating: "4.8/5", feedback: "Classic feel with a smooth ride." },
+            { cycleName: "Mountain Trek 3000", renter: "Lara Craft", date: "August 12, 2024", duration: "2.5 hours", price: "$12", rating: "4.3/5", feedback: "Good for city paths." }
+        ];
+
+        let currentPage = 0;
+        const itemsPerPage = 3;
+
+        function displayBookings() {
+            const bookingSection = document.getElementById('booking-section');
+            bookingSection.innerHTML = ''; // Clear previous content
+
+            const start = currentPage * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentBookings = bookings.slice(start, end);
+
+            currentBookings.forEach(booking => {
+                const bookingCard = document.createElement('div');
+                bookingCard.classList.add('booking-card');
+                bookingCard.innerHTML = `
+                    <h3>Cycle Name: ${booking.cycleName}</h3>
+                    <p><strong>Renter:</strong> ${booking.renter}</p>
+                    <p><strong>Date:</strong> ${booking.date}</p>
+                    <p><strong>Duration:</strong> ${booking.duration}</p>
+                    <p><strong>Total Price:</strong> ${booking.price}</p>
+                    <p><strong>Rating:</strong> ${booking.rating}</p>
+                    <p class="feedback"><strong>Feedback:</strong> "${booking.feedback}"</p>
+                `;
+                bookingSection.appendChild(bookingCard);
+            });
+
+            // Update page number display
+            document.getElementById('page-number').textContent = `Page ${currentPage + 1}`;
+
+            // Disable/Enable pagination buttons
+            document.getElementById('prev-btn').disabled = currentPage === 0;
+            document.getElementById('next-btn').disabled = end >= bookings.length;
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                displayBookings();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if ((currentPage + 1) * itemsPerPage < bookings.length) {
+                currentPage++;
+                displayBookings();
+            }
+        });
+
+        // Initial display
+        displayBookings();
+    </script>
+</body>
+</html>
